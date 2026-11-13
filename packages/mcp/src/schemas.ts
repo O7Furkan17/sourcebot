@@ -354,15 +354,31 @@ export const listCommitsQueryParamsSchema = z.object({
         .default(50),
 });
 
-export const listCommitsResponseSchema = z.array(z.object({
+const commitFields = {
     hash: z.string(),
     date: z.string(),
     message: z.string(),
     refs: z.string(),
     body: z.string(),
-    author_name: z.string(),
-    author_email: z.string(),
-}));
+};
+
+export const listCommitsResponseSchema = z.array(z.union([
+    z.object({
+        ...commitFields,
+        authorName: z.string(),
+        authorEmail: z.string(),
+    }),
+    // Servers before v4.16.5 return the author fields in snake_case.
+    z.object({
+        ...commitFields,
+        author_name: z.string(),
+        author_email: z.string(),
+    }).transform(({ author_name, author_email, ...commit }) => ({
+        ...commit,
+        authorName: author_name,
+        authorEmail: author_email,
+    })),
+]));
 
 export const languageModelInfoSchema = z.object({
     provider: z.string().describe("The model provider (e.g., 'anthropic', 'openai')"),

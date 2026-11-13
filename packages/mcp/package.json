@@ -6,6 +6,7 @@
     "types": "dist/index.d.ts",
     "scripts": {
         "build": "tsc",
+        "test": "node --import tsx --test src/schemas.test.ts",
         "dev": "node ./dist/index.js",
         "build:watch": "tsc-watch --preserveWatchOutput"
     },

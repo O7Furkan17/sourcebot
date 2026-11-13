@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Fixed `list_commits` failing to parse the response of servers v4.16.5 and later, which return `authorName` and `authorEmail` instead of `author_name` and `author_email`. Both forms are accepted now.
+
 ## [1.0.18] - 2026-02-28
 
 ### Changed
