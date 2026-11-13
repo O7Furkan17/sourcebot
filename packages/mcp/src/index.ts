@@ -10,7 +10,7 @@ import { askCodebase, getFileSource, listCommits, listLanguageModels, listRepos,
 import { env, numberSchema } from './env.js';
 import { askCodebaseRequestSchema, DEFAULT_MAX_TREE_ENTRIES, DEFAULT_TREE_DEPTH, fileSourceRequestSchema, listCommitsQueryParamsSchema, listReposQueryParamsSchema, listTreeRequestSchema, MAX_MAX_TREE_ENTRIES, MAX_TREE_DEPTH } from './schemas.js';
 import { AskCodebaseRequest, FileSourceRequest, ListCommitsQueryParamsSchema, ListReposQueryParams, ListTreeEntry, ListTreeRequest, TextContent } from './types.js';
-import { buildTreeNodeIndex, joinTreePath, normalizeTreePath, sortTreeEntries } from './utils.js';
+import { buildTreeNodeIndex, joinTreePath, normalizeTreePath, quoteSearchQuery, sortTreeEntries } from './utils.js';
 
 const dedent = _dedent.withOptions({ alignValues: true });
 
@@ -30,12 +30,7 @@ server.tool(
         query: z
             .string()
             .describe(`The search pattern to match against code contents. Do not escape quotes in your query.`)
-            // Escape backslashes first, then quotes, and wrap in double quotes
-            // so the query is treated as a literal phrase (like grep).
-            .transform((val) => {
-                const escaped = val.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-                return `"${escaped}"`;
-            }),
+            .transform(quoteSearchQuery),
         useRegex: z
             .boolean()
             .describe(`Whether to use regular expression matching to match the search query against code contents. When false, substring matching is used. (default: false)`)

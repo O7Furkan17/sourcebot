@@ -15,6 +15,30 @@ export class ServiceErrorException extends Error {
     }
 }
 
+/**
+ * Wraps a search query in double quotes so Sourcebot reads it as one phrase (like grep).
+ *
+ * The Sourcebot query parser removes the surrounding quotes and passes the text between
+ * them to the search engine without unescaping it. So backslash escapes such as `\w` must
+ * stay as they are: doubling them turns the regex `foo\w+` into `foo\\w+`, which matches a
+ * literal backslash. Only a bare double quote is escaped, because it would end the phrase,
+ * and a trailing lone backslash is escaped so it cannot escape the closing quote.
+ */
+export const quoteSearchQuery = (query: string): string => {
+    let escaped = '';
+    for (let i = 0; i < query.length; i++) {
+        const char = query[i];
+        if (char === '\\') {
+            escaped += i + 1 < query.length ? char + query[++i] : '\\\\';
+        } else if (char === '"') {
+            escaped += '\\"';
+        } else {
+            escaped += char;
+        }
+    }
+    return `"${escaped}"`;
+}
+
 export const normalizeTreePath = (path: string): string => {
     const withoutLeading = path.replace(/^\/+/, '');
     return withoutLeading.replace(/\/+$/, '');
